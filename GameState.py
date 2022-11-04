@@ -62,6 +62,9 @@ class GameState:
 
         return s
 
+    def stop_game(self):
+        self.started = False
+
 
 class PlayerTooTiredException(Exception):
     pass

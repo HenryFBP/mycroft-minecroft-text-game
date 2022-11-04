@@ -1,7 +1,7 @@
 from mycroft import MycroftSkill, intent_file_handler, adds_context
 from typing import Tuple
 
-from .GameState import GameState
+from .GameState import GameState, PlayerTooTiredException
 
 
 def cardinal_vector_to_direction(vector: Tuple[int, int]) -> str:
@@ -20,6 +20,36 @@ def cardinal_vector_to_direction(vector: Tuple[int, int]) -> str:
     raise Exception(f"Could not convert {vector} to a cardinal direction!")
 
 
+def game_must_be_started(funktion):
+    """Decorate with me if you only want to execute the function if the game has started."""
+
+    print("in @game_must_be_started")
+
+    def wrapper(self, *args, **kwargs):
+        if not self.game_state.started:
+            self.speak_dialog('error.game.not.started')
+            return
+
+        return funktion(self, *args, **kwargs)
+
+    return wrapper
+
+
+def ensure_game_saved_after(funktion):
+    """Decorate with me if you want to save the game after the decorated function has finished executing."""
+
+    print("in @ensure_game_saved_after")
+
+    def wrapper(self, *args, **kwargs):
+        result = funktion(self, *args, **kwargs)
+
+        self.save_current_game_to_file()
+
+        return result
+
+    return wrapper
+
+
 class MinecraftGame(MycroftSkill):
     SAVE_PATH = 'game_state.pkl'
     game_state: GameState = None
@@ -34,21 +64,21 @@ class MinecraftGame(MycroftSkill):
             print("You don't have a saved game. Creating one!")
             self.delete_saved_game_and_reset()
 
-    def ensure_game_started(self):
-        if not self.game_state.started:
-            self.speak_dialog('error.game.not.started')
-            return False
-
-        return True
-
-    @intent_file_handler('start.game.intent')
-    @adds_context('GameStartedContext')
+    @intent_file_handler('game.start.intent')
     def handle_game_start(self, message):
-        self.speak_dialog('starting.game')
+        self.speak_dialog('game.starting')
         self.game_state.start_game()
         self.save_current_game_to_file()
+        self.speak(self.game_state.speak_long_summary_of_game())
 
-    @intent_file_handler('reset.game.intent' )
+    @intent_file_handler('game.stop.intent')
+    @game_must_be_started
+    def handle_game_stop(self, message):
+        self.speak_dialog('game.stopping')
+        self.game_state.stop_game()
+        self.save_current_game_to_file()
+
+    @intent_file_handler('game.reset.intent')
     def handle_game_reset(self, message):
 
         self.speak(
@@ -57,11 +87,11 @@ class MinecraftGame(MycroftSkill):
         )
 
         user_response = self.ask_yesno("With that summary in mind, do you still want to delete your game save?")
-        if user_response == 'yes':
+        if user_response.lower() == 'yes':
             self.delete_saved_game_and_reset()
             self.speak("Game was reset.")
             return
-        elif user_response == 'no':
+        elif user_response.lower() == 'no':
             pass
         else:
             self.speak("Could not understand '{}'".format(user_response))
@@ -83,21 +113,21 @@ class MinecraftGame(MycroftSkill):
     def move_west(self, message):
         self.generic_move((-1, 0), "West")
 
+    @game_must_be_started
+    @ensure_game_saved_after
     def generic_move(self, vector: Tuple[int, int], direction_name: str):
 
-        if not self.ensure_game_started():
+        try:
+            self.game_state.move(vector)
+            self.speak_dialog('moving.direction', {'direction': direction_name})
+        except PlayerTooTiredException:
+            self.speak_dialog('error.player.too.tired.to.move')
             return False
-
-        self.speak_dialog('moving.direction', {'direction': direction_name})
-        self.game_state.move(vector)
 
         self.speak_dialog('player.current.position', {'position': str(self.game_state.pretty_position())})
 
         if self.game_state.is_tired():
             self.speak_dialog('player.is.tired')
-
-        # save after move
-        self.save_current_game_to_file()
 
     def save_current_game_to_file(self):
         with self.file_system.open(self.SAVE_PATH, 'wb') as my_file:
