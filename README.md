@@ -34,6 +34,8 @@ See <https://github.com/HenryFBP/VirtualMachineConfigs/tree/master/vagrant/ubunt
 
 And also run 
 
+    pushd ~/Git/mycroft-core/
+    bash start-mycroft.sh all
     mycroft-cli-client
 
 ## Add'l notes

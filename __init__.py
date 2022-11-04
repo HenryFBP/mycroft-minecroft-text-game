@@ -1,6 +1,7 @@
-from adapt.intent import IntentBuilder
-from mycroft import MycroftSkill, intent_file_handler, intent_handler, adds_context
-from typing import List, Dict, Tuple
+from mycroft import MycroftSkill, intent_file_handler, adds_context
+from typing import Tuple
+
+from .GameState import GameState
 
 
 def cardinal_vector_to_direction(vector: Tuple[int, int]) -> str:
@@ -19,51 +20,19 @@ def cardinal_vector_to_direction(vector: Tuple[int, int]) -> str:
     raise Exception(f"Could not convert {vector} to a cardinal direction!")
 
 
-class PlayerTooTiredException(Exception):
-    pass
-
-
-class GameState:
-
-    def __init__(self):
-        self.started = False
-        self.player_health = 0
-        self.player_stamina = 0
-        self.inventory = []
-        self.position = [0, 0]
-
-    def start_game(self):
-        self.started = True
-        self.player_health = 100
-        self.player_stamina = 100
-        self.inventory = []
-        self.position = [0, 0]
-
-    def move(self, vec: Tuple[int, int]):
-        if self.player_stamina > 0:
-            self.player_stamina -= 10
-            self.position[0] += vec[0]
-            self.position[1] += vec[1]
-        else:
-            raise PlayerTooTiredException("Player is too tired to move!")
-
-    def is_tired(self):
-        return self.player_stamina <= 30
-
-    def pretty_position(self):
-        return "{} units North-South and {} units East-West".format(self.get_northsouth_position(), self.get_eastwest_position())
-
-    def get_northsouth_position(self):
-        return self.position[1]
-
-    def get_eastwest_position(self):
-        return self.position[0]
-
-
 class MinecraftGame(MycroftSkill):
+    SAVE_PATH = 'game_state.pkl'
+    game_state: GameState = None
+
     def __init__(self):
         MycroftSkill.__init__(self)
-        self.game_state = GameState()
+        if self.has_saved_game_file():
+            print("Using existing saved game at " + self.SAVE_PATH)
+            self.load_game_from_file()
+            self.save_current_game_to_file()
+        else:
+            print("You don't have a saved game. Creating one!")
+            self.delete_saved_game_and_reset()
 
     def ensure_game_started(self):
         if not self.game_state.started:
@@ -77,11 +46,26 @@ class MinecraftGame(MycroftSkill):
     def handle_game_start(self, message):
         self.speak_dialog('starting.game')
         self.game_state.start_game()
+        self.save_current_game_to_file()
 
-        self.speak_dialog('opening.scene')
+    @intent_file_handler('reset.game.intent' )
+    def handle_game_reset(self, message):
 
-        resp = self.speak_dialog('next.action', expect_response=True)
-        print(resp)
+        self.speak(
+            "About to delete the game save. Are you sure? A long summary: {}".format(
+                self.game_state.speak_long_summary_of_game())
+        )
+
+        user_response = self.ask_yesno("With that summary in mind, do you still want to delete your game save?")
+        if user_response == 'yes':
+            self.delete_saved_game_and_reset()
+            self.speak("Game was reset.")
+            return
+        elif user_response == 'no':
+            pass
+        else:
+            self.speak("Could not understand '{}'".format(user_response))
+        self.speak("Aborting game save deletion. Game save was not deleted.")
 
     @intent_file_handler('move.north.intent')
     def move_north(self, message):
@@ -100,6 +84,7 @@ class MinecraftGame(MycroftSkill):
         self.generic_move((-1, 0), "West")
 
     def generic_move(self, vector: Tuple[int, int], direction_name: str):
+
         if not self.ensure_game_started():
             return False
 
@@ -110,6 +95,38 @@ class MinecraftGame(MycroftSkill):
 
         if self.game_state.is_tired():
             self.speak_dialog('player.is.tired')
+
+        # save after move
+        self.save_current_game_to_file()
+
+    def save_current_game_to_file(self):
+        with self.file_system.open(self.SAVE_PATH, 'wb') as my_file:
+            data = self.game_state.serialize()
+            print(data)
+            my_file.write(data)
+
+    def has_saved_game_file(self):
+        return self.file_system.exists(self.SAVE_PATH)
+
+    def load_game_from_file(self) -> GameState:
+        with self.file_system.open(self.SAVE_PATH, 'rb') as my_file:
+            content: str = my_file.read()
+            print(content)
+            if content == b'':
+                print("WARNING: File at " + self.SAVE_PATH + " seems to be empty.")
+                self.reset_gamestate()
+            else:
+                self.game_state = GameState.deserialize(content)
+                print("Loaded GameState: " + self.game_state.speak_long_summary_of_game())
+
+            return self.game_state
+
+    def delete_saved_game_and_reset(self):
+        self.reset_gamestate()
+        self.save_current_game_to_file()
+
+    def reset_gamestate(self):
+        self.game_state = GameState()
 
 
 def create_skill():
