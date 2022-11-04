@@ -35,3 +35,9 @@ See <https://github.com/HenryFBP/VirtualMachineConfigs/tree/master/vagrant/ubunt
 And also run 
 
     mycroft-cli-client
+
+## Add'l notes
+
+<https://mycroft-ai.gitbook.io/docs/skill-development/user-interaction/prompts>
+
+<https://mycroft-ai.gitbook.io/docs/skill-development/user-interaction/conversational-context>
