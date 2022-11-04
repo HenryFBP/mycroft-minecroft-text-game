@@ -5,9 +5,9 @@ class MinecraftGame(MycroftSkill):
     def __init__(self):
         MycroftSkill.__init__(self)
 
-    @intent_file_handler('game.minecraft.intent')
-    def handle_game_minecraft(self, message):
-        self.speak_dialog('game.minecraft')
+    @intent_file_handler('blockgame.intent.start_game')
+    def handle_game_start(self, message):
+        self.speak_dialog('blockgame.response.starting_game')
 
 
 def create_skill():
