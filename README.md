@@ -28,7 +28,7 @@ Henry Post and Logan C
 #Text game
 #Game
 
-## Local development
+## How do I run this
 
 See <https://github.com/HenryFBP/VirtualMachineConfigs/tree/master/vagrant/ubuntu-mycroft>
 
