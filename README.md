@@ -1,8 +1,10 @@
-# <img src="https://raw.githack.com/FortAwesome/Font-Awesome/master/svgs/solid/cubes.svg" card_color="#40DBB0" width="50" height="50" style="vertical-align:bottom"/> Minecraft Game
-Play a minecraft clone text game
+# <img src="https://raw.githack.com/FortAwesome/Font-Awesome/master/svgs/solid/cubes.svg" card_color="#40DBB0" width="50" height="50" style="vertical-align:bottom"/> Mycroft Minecraft Text Game
+
+Play a text-based game based on minecraft 
 
 ## About
-Play a text-based minecraft clone
+
+Play a text-based game based on minecraft 
 
 ## Examples
 * "Play minecraft text game"
