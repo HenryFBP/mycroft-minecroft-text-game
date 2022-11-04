@@ -5,7 +5,7 @@ Play a minecraft clone text game
 Play a text-based minecraft clone
 
 ## Examples
-* "Play minecraft demo"
+* "Play minecraft text game"
 * "Play minecraft game"
 
 ## Credits
