@@ -97,6 +97,12 @@ class MinecraftGame(MycroftSkill):
             self.speak("Could not understand '{}'".format(user_response))
         self.speak("Aborting game save deletion. Game save was not deleted.")
 
+    @intent_file_handler('inspect.surroundings.intent')
+    @game_must_be_started
+    @ensure_game_saved_after
+    def handle_look_around(self, message):
+        self.speak(self.game_state.speak_look_around())
+
     @intent_file_handler('move.north.intent')
     def move_north(self, message):
         self.generic_move((0, 1), "North")

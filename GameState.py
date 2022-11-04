@@ -65,6 +65,16 @@ class GameState:
     def stop_game(self):
         self.started = False
 
+    def speak_look_around(self):
+
+        if self.get_northsouth_position() < -3:
+            return "You see a vast, dry, cracked desert before you. A few acacia trees punctuate the otherwise unremarkable landscape."
+
+        if self.get_northsouth_position() > 3:
+            return "You see a snowy tundra. There are tall pine trees."
+
+        return "You see a grassy field, dotted with trees and flowers. There might be animals in the distance."
+
 
 class PlayerTooTiredException(Exception):
     pass
