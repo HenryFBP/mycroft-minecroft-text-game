@@ -1,4 +1,4 @@
-# <img src="https://raw.githack.com/FortAwesome/Font-Awesome/master/svgs/solid/cubes.svg" card_color="#40DBB0" width="50" height="50" style="vertical-align:bottom"/> Mycroft "Minecroft" Text Game
+# <img src="https://raw.githack.com/FortAwesome/Font-Awesome/master/svgs/solid/cubes.svg" card_color="#40DBB0" width="50" height="50" style="vertical-align:bottom"/>  Mycroft "Minecroft" Text Game
 
 Play a text-based game based on minecraft
 
