@@ -27,10 +27,16 @@ class Player:
         else:
             raise PlayerTooTiredException("Player is too tired to move!")
 
-    def pretty_position(self):
+    def pretty_position_long(self):
         return "{} units North-South and {} units East-West".format(
             self.get_northsouth_position(),
             self.get_eastwest_position(),
+        )
+
+    def pretty_position_short(self):
+        return "{} comma {}".format(
+            self.get_northsouth_position(),
+            self.get_eastwest_position()
         )
 
     def get_northsouth_position(self):
@@ -63,10 +69,21 @@ class GameState:
     def speak_long_summary_of_game(self):
         s = ""
 
-        s += "You are {}. \n".format(self.player.pretty_position())
+        s += "You are {}. \n".format(self.player.pretty_position_long())
         s += "You have {} health and {} stamina. \n".format(self.player.health, self.player.stamina)
         s += "You have {} items in your inventory.\n".format(len(self.player.inventory))
         s += "You have walked {} steps.\n".format(self.player.steps_walked)
+
+        return s
+
+    def speak_short_summary_of_game(self):
+        s = "At heading {}.\n".format(self.player.pretty_position_short())
+        s += "You have {} hp, {} stamina, {} items.\n".format(
+            self.player.health,
+            self.player.stamina,
+            len(self.player.inventory)
+        )
+        s += "Walked {} steps.\n".format(self.player.steps_walked)
 
         return s
 
@@ -162,7 +179,6 @@ class MinecraftGame(MycroftSkill):
         self.game_state.player.recover_stamina()
         self.speak("You feel full of energy.")
 
-
     @intent_file_handler('game.stop.intent')
     @game_must_be_started
     def handle_game_stop(self, message):
@@ -193,6 +209,7 @@ class MinecraftGame(MycroftSkill):
     @game_must_be_started
     @ensure_game_saved_after
     def handle_look_around(self, message):
+        self.speak(self.game_state.speak_short_summary_of_game())
         self.speak(self.game_state.speak_look_around())
 
     @intent_file_handler('player.confused.intent')
@@ -226,7 +243,7 @@ class MinecraftGame(MycroftSkill):
             self.speak_dialog('error.player.too.tired.to.move')
             return False
 
-        self.speak_dialog('player.current.position', {'position': str(self.game_state.player.pretty_position())})
+        self.speak_dialog('player.current.position', {'position': str(self.game_state.player.pretty_position_long())})
 
         if self.game_state.player.is_tired():
             self.speak_dialog('player.is.tired')
