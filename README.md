@@ -56,3 +56,9 @@ With a venv path of:
 <https://mycroft-ai.gitbook.io/docs/skill-development/user-interaction/prompts>
 
 <https://mycroft-ai.gitbook.io/docs/skill-development/user-interaction/conversational-context>
+
+## Inspiration
+
+<https://github.com/forslund/white-house-adventure>
+
+<https://www.minecraft.net/en-us>
