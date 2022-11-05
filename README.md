@@ -34,16 +34,18 @@ See <https://github.com/HenryFBP/VirtualMachineConfigs/tree/master/vagrant/ubunt
 
 You must first run the commands in the above repo to set up a Mycroft development environment.
 
-And also run 
+And also run
 
     pushd ~/Git/mycroft-core/
     bash start-mycroft.sh all
     source venv-activate.sh
     mycroft-cli-client
 
+You may need to then navigate to <https://account.mycroft.ai/> to pair the Mycroft CLI client.
+
 ### Editor
 
-I use PyCharm, 
+I use PyCharm,
 
 With a venv path of:
 

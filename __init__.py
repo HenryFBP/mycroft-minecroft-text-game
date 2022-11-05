@@ -1,7 +1,7 @@
 from mycroft import MycroftSkill, intent_file_handler, adds_context
 from typing import Tuple
 
-from .GameState import GameState, PlayerTooTiredException
+from .Models import GameState, PlayerTooTiredException
 
 
 def cardinal_vector_to_direction(vector: Tuple[int, int]) -> str:
