@@ -28,15 +28,26 @@ Henry Post and Logan C
 #Text game
 #Game
 
-## How do I run this
+## Development
 
 See <https://github.com/HenryFBP/VirtualMachineConfigs/tree/master/vagrant/ubuntu-mycroft>
+
+You must first run the commands in the above repo to set up a Mycroft development environment.
 
 And also run 
 
     pushd ~/Git/mycroft-core/
     bash start-mycroft.sh all
+    source venv-activate.sh
     mycroft-cli-client
+
+### Editor
+
+I use PyCharm, 
+
+With a venv path of:
+
+    /home/vagrant/Git/mycroft-core/.venv/bin/python3
 
 ## Add'l notes
 
