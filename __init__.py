@@ -1,3 +1,6 @@
+import os
+import time
+
 from mycroft import MycroftSkill, intent_file_handler
 
 import pickle
@@ -35,6 +38,9 @@ class Player:
 
     def get_eastwest_position(self):
         return self.position[0]
+
+    def recover_stamina(self):
+        self.stamina = 100
 
 
 class GameState:
@@ -98,7 +104,7 @@ def cardinal_vector_to_direction(vector: Tuple[int, int]) -> str:
     raise Exception(f"Could not convert {vector} to a cardinal direction!")
 
 
-def game_must_be_started(funktion):
+def game_must_be_started(function):
     """Decorate with me if you only want to execute the function if the game has started."""
 
     print("in @game_must_be_started")
@@ -108,18 +114,18 @@ def game_must_be_started(funktion):
             self.speak_dialog('error.game.not.started')
             return
 
-        return funktion(self, *args, **kwargs)
+        return function(self, *args, **kwargs)
 
     return wrapper
 
 
-def ensure_game_saved_after(funktion):
+def ensure_game_saved_after(function):
     """Decorate with me if you want to save the game after the decorated function has finished executing."""
 
     print("in @ensure_game_saved_after")
 
     def wrapper(self, *args, **kwargs):
-        result = funktion(self, *args, **kwargs)
+        result = function(self, *args, **kwargs)
 
         self.save_current_game_to_file()
 
@@ -148,6 +154,14 @@ class MinecraftGame(MycroftSkill):
         self.game_state.start_game()
         self.save_current_game_to_file()
         self.speak(self.game_state.speak_long_summary_of_game())
+
+    @intent_file_handler('recover.stamina.intent')
+    @game_must_be_started
+    def handle_recover_stamina(self, message):
+        time.sleep(5)
+        self.game_state.player.recover_stamina()
+        self.speak("You feel full of energy.")
+
 
     @intent_file_handler('game.stop.intent')
     @game_must_be_started
@@ -180,6 +194,10 @@ class MinecraftGame(MycroftSkill):
     @ensure_game_saved_after
     def handle_look_around(self, message):
         self.speak(self.game_state.speak_look_around())
+
+    @intent_file_handler('player.confused.intent')
+    def player_needs_help(self, message):
+        self.speak("todo implement help")
 
     @intent_file_handler('move.north.intent')
     def move_north(self, message):
