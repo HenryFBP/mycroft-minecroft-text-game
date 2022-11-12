@@ -251,7 +251,8 @@ class MinecraftGame(MycroftSkill):
     def save_current_game_to_file(self):
         with self.file_system.open(self.SAVE_PATH, 'wb') as my_file:
             data = self.game_state.serialize()
-            print(data)
+            self.log.debug('Pickled gamestate we are writing:')
+            self.log.debug(data)
             my_file.write(data)
 
     def has_saved_game_file(self):
@@ -259,14 +260,15 @@ class MinecraftGame(MycroftSkill):
 
     def load_game_from_file(self) -> GameState:
         with self.file_system.open(self.SAVE_PATH, 'rb') as my_file:
-            content: str = my_file.read()
-            print(content)
+            content: bytes = my_file.read()
+            self.log.debug('Pickled gamestate we are loading from {}:'.format(self.SAVE_PATH))
+            self.log.debug(content)
             if content == b'':
-                print("WARNING: File at " + self.SAVE_PATH + " seems to be empty.")
+                self.log.info("WARNING: File at {0} seems to be empty.".format(self.SAVE_PATH))
                 self.reset_gamestate()
             else:
                 self.game_state = GameState.deserialize(content)
-                print("Loaded GameState: " + self.game_state.speak_long_summary_of_game())
+                self.log.info("Loaded GameState: {0}".format(self.game_state.speak_long_summary_of_game()))
 
             return self.game_state
 
