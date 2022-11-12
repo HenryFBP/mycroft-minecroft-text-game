@@ -7,6 +7,26 @@ import pickle
 from typing import Tuple
 
 
+class Items:
+    def __init__(self, name, amount):
+        self.name = name
+        self.amount = amount
+
+class Inventory:
+    def __init__(self):
+        pass
+
+# Boundy inventory crafting calculation
+
+myIron = Items('Iron', 1)
+myIron2 = Items('Iron', 1)
+myIron3 = Items('Iron', 1)
+myStick1 = Items('Stick', 1)
+myBoundy1 = Items('Boundy', 1)
+
+myInventory = [myIron, myIron2, myIron3, myStick1, myBoundy1]
+
+
 class Player:
     def __init__(self):
         self.health = 100
@@ -171,6 +191,34 @@ class MinecraftGame(MycroftSkill):
         self.game_state.start_game()
         self.save_current_game_to_file()
         self.speak(self.game_state.speak_long_summary_of_game())
+
+
+    @intent_file_handler('test.intent')
+    def handle_test(self, message):
+        self.speak_dialog('Buster is testing')
+
+        summed_items = dict()
+        summed_items = {}
+        for item in myInventory:
+            item: Item
+            item_name = item.name
+            item_amount = item.amount
+
+            self.speak_dialog("You have {} of {}".format(item_name, item_amount))
+
+            # if we haven't seen this item before, initialize its number of times seen to zero
+            if not (item_name in summed_items):
+                summed_items[item_name] = 0
+
+            # sum up how many times we saw this item in our inventory
+            summed_items[item_name] = summed_items[item_name] + item_amount
+
+        # outside the for loop, we are done summing
+        self.speak_dialog("summed items:")
+
+        for sum_name, sum_amount in summed_items.items():
+            self.speak_dialog('{} of {}'.format(sum_amount,sum_name))
+
 
     @intent_file_handler('recover.stamina.intent')
     @game_must_be_started
